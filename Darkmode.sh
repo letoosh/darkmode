@@ -2,7 +2,7 @@
 #
 ## macOS Dark Mode at sunset
 ## Solar times pulled from Night Shift
-## Author: katernet ## Version 1.9b - Introduce static time
+## Author: katernet ## Version 1.9b2
 
 ## Global variables ##
 darkdir=~/Library/Application\ Support/darkmode # darkmode directory
@@ -122,17 +122,23 @@ launch() {
 	shdir="$(cd "$(dirname "$0")" && pwd)" # Get script path
 	cp -p "$shdir"/darkmode.sh "$darkdir"/ # Copy script to darkmode directory
 	mkdir ~/Library/LaunchAgents 2> /dev/null; cd "$_" || return # Create LaunchAgents directory (if required) and cd there
-	# Setup launch agent plists	
+	# Setup launch agent plists
 	/usr/libexec/PlistBuddy -c "Add :Label string io.github.katernet.darkmode.sunrise" "$plistR" 1> /dev/null
-	/usr/libexec/PlistBuddy -c "Add :Program string ${darkdir}/darkmode.sh" "$plistR"
 	/usr/libexec/PlistBuddy -c "Add :RunAtLoad bool true" "$plistR"
 	/usr/libexec/PlistBuddy -c "Add :Label string io.github.katernet.darkmode.sunset" "$plistS" 1> /dev/null
-	/usr/libexec/PlistBuddy -c "Add :Program string ${darkdir}/darkmode.sh" "$plistS"
+	if [ $# -eq 0 ]; then # No arguments provided - solar
+		/usr/libexec/PlistBuddy -c "Add :Program string ${darkdir}/darkmode.sh" "$plistR"
+		/usr/libexec/PlistBuddy -c "Add :Program string ${darkdir}/darkmode.sh" "$plistS"
+	fi
 	if [ $# -eq 2 ]; then # If static time arguments provided
 		/usr/libexec/PlistBuddy -c "Add :ProgramArguments array" "$plistR"
-		/usr/libexec/PlistBuddy -c "Add :ProgramArguments:0 string $1 $2" "$plistR"
+		/usr/libexec/PlistBuddy -c "Add :ProgramArguments:0 string ${darkdir}/darkmode.sh" "$plistR"
+		/usr/libexec/PlistBuddy -c "Add :ProgramArguments:1 string $1" "$plistR"
+		/usr/libexec/PlistBuddy -c "Add :ProgramArguments:2 string $2" "$plistR"
 		/usr/libexec/PlistBuddy -c "Add :ProgramArguments array" "$plistS"
-		/usr/libexec/PlistBuddy -c "Add :ProgramArguments:0 string $1 $2" "$plistS"
+		/usr/libexec/PlistBuddy -c "Add :ProgramArguments:0 string ${darkdir}/darkmode.sh" "$plistS"
+		/usr/libexec/PlistBuddy -c "Add :ProgramArguments:1 string $1" "$plistS"
+		/usr/libexec/PlistBuddy -c "Add :ProgramArguments:2 string $2" "$plistS"
 	fi
 	# Load launch agents
 	launchctl load "$plistR"
@@ -158,7 +164,8 @@ editPlist() {
 			/usr/libexec/PlistBuddy -c "Set :StartCalendarInterval:Hour $2" "$4"
 			/usr/libexec/PlistBuddy -c "Set :StartCalendarInterval:Minute $3" "$4"
 			if [ $# -eq 6 ]; then
-				/usr/libexec/PlistBuddy -c "Set :ProgramArguments:0 $5 $6" "$4"
+				/usr/libexec/PlistBuddy -c "Set :ProgramArguments:0 $5" "$4"
+				/usr/libexec/PlistBuddy -c "Set :ProgramArguments:1 $6" "$4"
 			fi
 			# Load launch agent
 			launchctl load "$4"
