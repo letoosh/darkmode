@@ -2,7 +2,7 @@
 #
 ## macOS Dark Mode at sunset
 ## Solar times pulled from Night Shift
-## Author: katernet ## Version 1.9b2
+## Author: katernet ## Version 1.9b3
 
 ## Global variables ##
 darkdir=~/Library/Application\ Support/darkmode # darkmode directory
@@ -164,8 +164,8 @@ editPlist() {
 			/usr/libexec/PlistBuddy -c "Set :StartCalendarInterval:Hour $2" "$4"
 			/usr/libexec/PlistBuddy -c "Set :StartCalendarInterval:Minute $3" "$4"
 			if [ $# -eq 6 ]; then
-				/usr/libexec/PlistBuddy -c "Set :ProgramArguments:0 $5" "$4"
-				/usr/libexec/PlistBuddy -c "Set :ProgramArguments:1 $6" "$4"
+				/usr/libexec/PlistBuddy -c "Set :ProgramArguments:1 $5" "$4"
+				/usr/libexec/PlistBuddy -c "Set :ProgramArguments:2 $6" "$4"
 			fi
 			# Load launch agent
 			launchctl load "$4"
